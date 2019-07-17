@@ -1,10 +1,9 @@
 ﻿<?php
-
 //connect database
-include './php/connect.php';
+// include './php/connect.php';
 
 //create tables
-include "./php/createTable.php";
+// include "./php/createTable.php";
 
 if(isset($_POST["name"])){
     $name = $_POST["name"];
@@ -14,23 +13,57 @@ if(isset($_POST["mobile"])){
 }
 
 $errorName = $errorMobile = $message = $run =  "";
+$errorCount = 0;
 
 if(isset($_POST["loginSubmit"])){
 
 	if(empty($name)){
 		$errorName = "*cannot be empty";
+		$errorCount += 1;
 	}
 	if(empty($mobile)){
 		$errorMobile = "*cannot be empty";
+		$errorCount += 1;
 	}
 
-	$insert = "INSERT INTO connect_info (name, mobile) VALUES ('$name', $mobile);";
+	// $insert = "INSERT INTO connect_info (name, mobile) VALUES ('$name', $mobile);";
 
-	$run = mysqli_query($conn, $insert);
+	// $run = mysqli_query($conn, $insert);
 
-	if($run){
-		$message = "Data Saved";
+	// if($run){
+	// 	$message = "Data Saved";
+	// }
+	if($errorCount > 0){
+		$message = "Invalid Credentials";
+	}else{
+		$file_open = fopen("contact_data.csv", "a");
+		// $form_data = array(
+		// 	"Sr. no.",
+		// 	"Name",
+		// 	"Mobile"
+		// );
+		// fputcsv($file_open, $form_data);
+
+		$no_rows = count(file("contact_data.csv"));
+		if(!$no_rows){
+			require "./heading.php";
+		}
+
+		if($no_rows > 1)
+		{
+			$no_rows = ($no_rows - 1);
+		}
+		$form_data = array(
+			'sr_no'  => $no_rows,
+			'name'  => $name,
+			'mobile'  => $mobile
+		);
+		$run = fputcsv($file_open, $form_data);
+		if($run){
+			$message = "Data Saved";
+		}
 	}
+	
 }
 ?>
 
@@ -75,14 +108,14 @@ if(isset($_POST["loginSubmit"])){
 				<label for="Name">Name</label>
 				<br>
 				<input type="text" style="margin-bottom:0px" name="name" placeholder="Name">
-				<p class="text-danger"><?php echo $errorName; ?></p>
+				<p style="color:red"><?php echo $errorName; ?></p>
 			</div>
 			
 			<div>
 				<label for="mobileNumber">Mobile Number</label>
 				<br>
 				<input type="text" name="mobile" style="margin-bottom:0px" placeholder="Mobile number">
-				<p class="text-danger" ><?php echo $errorMobile; ?></p>
+				<p style="color:red"><?php echo $errorMobile; ?></p>
 			</div>
 			<button type="submit" name = "loginSubmit">Submit</button>
 		</form>
